@@ -1,0 +1,10 @@
+services:
+  database:
+    image: postgres:17
+    container_name: postgres-docker
+    environment:
+      POSTGRES_DB: musicapi
+      POSTGRES_USER: postgresuser
+      POSTGRES_PASSWORD: postgrespassword
+    ports:
+      - "5433:5432"

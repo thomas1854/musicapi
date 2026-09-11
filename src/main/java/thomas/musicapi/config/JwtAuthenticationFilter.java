@@ -43,6 +43,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         jwt = authHeader.substring(7);
         username = jwtService.extractUsername(jwt);
 
+        // TODO: Validate the token's expiration before loading the user to avoid unnecessary database queries and computation.
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null)
         {
             UserDetails userDetails = userDetailsService.loadUserByUsername(username);

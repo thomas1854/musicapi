@@ -44,6 +44,7 @@ public class JwtService {
                 .expiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 24)).signWith(getSigningKey(), Jwts.SIG.HS256).compact();
     }
 
+    // TODO: Remove isTokenValid and rely solely on isTokenExpired, since users are loaded by username and the token's subject must match.
     public boolean isTokenValid(String token, UserDetails userDetails)
     {
         final String username = extractUsername(token);

@@ -1,6 +1,7 @@
 package thomas.musicapi.exception;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -14,6 +15,15 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.CONFLICT)
     @ExceptionHandler(UsernameExistsException.class)
     public Map<String, String> handleIllegalArgumentException(UsernameExistsException exception)
+    {
+        Map<String, String> error = new HashMap<>();
+        error.put("message", exception.getMessage());
+        return error;
+    }
+
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    @ExceptionHandler(UsernameNotFoundException.class)
+    public Map<String, String> handleUsernameNotFoundException(UsernameNotFoundException exception)
     {
         Map<String, String> error = new HashMap<>();
         error.put("message", exception.getMessage());
