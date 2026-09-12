@@ -14,7 +14,16 @@ import java.util.Map;
 public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.CONFLICT)
     @ExceptionHandler(UsernameExistsException.class)
-    public Map<String, String> handleIllegalArgumentException(UsernameExistsException exception)
+    public Map<String, String> handleUsernameExistsException(UsernameExistsException exception)
+    {
+        Map<String, String> error = new HashMap<>();
+        error.put("message", exception.getMessage());
+        return error;
+    }
+
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(IllegalArgumentException.class)
+    public Map<String, String> handleIllegalArgumentException(IllegalArgumentException exception)
     {
         Map<String, String> error = new HashMap<>();
         error.put("message", exception.getMessage());
