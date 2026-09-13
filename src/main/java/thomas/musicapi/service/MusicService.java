@@ -1,5 +1,6 @@
 package thomas.musicapi.service;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Controller;
 import org.springframework.stereotype.Service;
@@ -24,7 +25,8 @@ public class MusicService {
     private final S3Client s3Client;
     private final UserRepository userRepository;
     private final MusicRepository musicRepository;
-
+    @Value("${music.bucket}")
+    String bucket;
     public MusicService(S3Client s3Client, UserRepository userRepository, MusicRepository musicRepository) {
         this.s3Client = s3Client;
         this.userRepository = userRepository;
@@ -56,7 +58,6 @@ public class MusicService {
         if (user != null)
         {
             String storageKey = UUID.randomUUID() + "_" + multipartFile.getOriginalFilename();
-            String bucket = "music";
 
             PutObjectRequest putObjectRequest = PutObjectRequest.builder().bucket(bucket).key(storageKey).contentType(multipartFile.getContentType()).build();
             s3Client.putObject(putObjectRequest, RequestBody.fromBytes(multipartFile.getBytes()));
