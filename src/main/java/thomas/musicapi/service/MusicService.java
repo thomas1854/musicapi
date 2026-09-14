@@ -1,6 +1,8 @@
 package thomas.musicapi.service;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Controller;
 import org.springframework.stereotype.Service;
@@ -9,14 +11,18 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.multipart.MultipartFile;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import thomas.musicapi.dto.UploadMusicRequest;
+import thomas.musicapi.exception.ResourceAccessDeniedException;
+import thomas.musicapi.exception.ResourceNotFoundException;
 import thomas.musicapi.model.Music;
 import thomas.musicapi.model.User;
 import thomas.musicapi.repository.MusicRepository;
 import thomas.musicapi.repository.UserRepository;
 
 import java.io.IOException;
+import java.nio.file.AccessDeniedException;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -68,5 +74,24 @@ public class MusicService {
         }
         else
             throw new UsernameNotFoundException("username not found");
+    }
+
+    public void deleteMusic(Long id)  {
+        Music music = musicRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Music not found"));
+
+        Authentication authentication =  SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null)
+            throw new UsernameNotFoundException("Authentication required");
+
+        if(!music.getUser().getUsername().equals(authentication.getName()))
+            throw new ResourceAccessDeniedException("You do not have access to delete this resource");
+
+        DeleteObjectRequest request = DeleteObjectRequest.builder()
+                .bucket(bucket)
+                .key(music.getStorageKey())
+                .build();
+
+        s3Client.deleteObject(request);
+        musicRepository.delete(music);
     }
 }
