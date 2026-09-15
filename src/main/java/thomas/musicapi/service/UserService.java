@@ -36,16 +36,16 @@ public class UserService {
     private User signupRequestToUser(SignupRequest signupRequest) {
         User user = new User();
         LocalDateTime currentDateTime = LocalDateTime.now();
-        user.setUsername(signupRequest.getUsername());
-        user.setPassword(passwordEncoder.encode(signupRequest.getPassword()));
-        user.setEmail(signupRequest.getEmail());
+        user.setUsername(signupRequest.username());
+        user.setPassword(passwordEncoder.encode(signupRequest.password()));
+        user.setEmail(signupRequest.email());
         user.setUserRole("USER");
         user.setCreatedAt(currentDateTime);
         return user;
     }
 
     public AuthResponse signup(SignupRequest signupRequest) {
-        if (userRepository.existsByUsername(signupRequest.getUsername()))
+        if (userRepository.existsByUsername(signupRequest.username()))
             throw new UsernameExistsException("this username is already used");
         User userRequest = signupRequestToUser(signupRequest);
         User savedUser = userRepository.save(userRequest);
@@ -55,8 +55,8 @@ public class UserService {
     }
 
     public AuthResponse login(LoginRequest loginRequest) {
-        authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
-        CustomUserDetails user = (CustomUserDetails) userDetailsService.loadUserByUsername(loginRequest.getUsername());
+        authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginRequest.username(), loginRequest.password()));
+        CustomUserDetails user = (CustomUserDetails) userDetailsService.loadUserByUsername(loginRequest.username());
         var jwtToken = jwtService.generateToken(user);
         return new AuthResponse(jwtToken);
     }

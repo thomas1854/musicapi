@@ -1,5 +1,6 @@
 package thomas.musicapi.service;
 
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -13,6 +14,7 @@ import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
+import thomas.musicapi.dto.UpdateMusicRequest;
 import thomas.musicapi.dto.UploadMusicRequest;
 import thomas.musicapi.exception.ResourceAccessDeniedException;
 import thomas.musicapi.exception.ResourceNotFoundException;
@@ -42,7 +44,7 @@ public class MusicService {
     private Music uploadMusicRequestToMusic(UploadMusicRequest uploadMusicRequest, MultipartFile multipartFile, User user, String storageKey)
     {
         Music music = new Music();
-        music.setTitle(uploadMusicRequest.getTitle());
+        music.setTitle(uploadMusicRequest.title());
         music.setUser(user);
         music.setCreatedAt(LocalDateTime.now());
         music.setUpdatedAt(LocalDateTime.now());
@@ -59,21 +61,19 @@ public class MusicService {
         String content = multipartFile.getContentType();
         if (content == null || !content.startsWith("audio/"))
             throw new IllegalArgumentException("File must be audio");
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null)
+            throw new UsernameNotFoundException("Authentication required");
+        User user = userRepository.findByUsername(authentication.getName());
 
-        User user = userRepository.findByUsername(uploadMusicRequest.getUsername());
-        if (user != null)
-        {
-            String storageKey = UUID.randomUUID() + "_" + multipartFile.getOriginalFilename();
+        String storageKey = UUID.randomUUID() + "_" + multipartFile.getOriginalFilename();
 
-            PutObjectRequest putObjectRequest = PutObjectRequest.builder().bucket(bucket).key(storageKey).contentType(multipartFile.getContentType()).build();
-            s3Client.putObject(putObjectRequest, RequestBody.fromBytes(multipartFile.getBytes()));
+        PutObjectRequest putObjectRequest = PutObjectRequest.builder().bucket(bucket).key(storageKey).contentType(multipartFile.getContentType()).build();
+        s3Client.putObject(putObjectRequest, RequestBody.fromBytes(multipartFile.getBytes()));
 
-            Music music = uploadMusicRequestToMusic(uploadMusicRequest, multipartFile, user, storageKey);
-            System.out.println(storageKey);
-            return musicRepository.save(music);
-        }
-        else
-            throw new UsernameNotFoundException("username not found");
+        Music music = uploadMusicRequestToMusic(uploadMusicRequest, multipartFile, user, storageKey);
+        System.out.println(storageKey);
+        return musicRepository.save(music);
     }
 
     public void deleteMusic(Long id)  {
@@ -93,5 +93,42 @@ public class MusicService {
 
         s3Client.deleteObject(request);
         musicRepository.delete(music);
+    }
+
+    @Transactional
+    public Music updateMusic(Long id, UpdateMusicRequest updateMusicRequest, MultipartFile multipartFile) throws IOException {
+        Music music = musicRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Music not found"));
+
+        Authentication authentication =  SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null)
+            throw new UsernameNotFoundException("Authentication required");
+
+        if(!music.getUser().getUsername().equals(authentication.getName()))
+            throw new ResourceAccessDeniedException("You do not have access to delete this resource");
+
+        if (updateMusicRequest != null && updateMusicRequest.title() != null)
+            music.setTitle(updateMusicRequest.title());
+
+        if (multipartFile != null)
+        {
+            DeleteObjectRequest request = DeleteObjectRequest.builder()
+                    .bucket(bucket)
+                    .key(music.getStorageKey())
+                    .build();
+            s3Client.deleteObject(request);
+
+            String newStorageKey = UUID.randomUUID() + "_" + multipartFile.getOriginalFilename();
+            PutObjectRequest putObjectRequest = PutObjectRequest.builder().bucket(bucket).key(newStorageKey).contentType(multipartFile.getContentType()).build();
+            s3Client.putObject(putObjectRequest, RequestBody.fromBytes(multipartFile.getBytes()));
+
+            music.setUpdatedAt(LocalDateTime.now());
+            music.setStorageKey(newStorageKey);
+            music.setFileSize(multipartFile.getSize());
+            music.setDuration(10L);
+            music.setMimeType(multipartFile.getContentType());
+            music.setFileName(multipartFile.getOriginalFilename());
+        }
+
+        return music;
     }
 }

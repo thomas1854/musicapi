@@ -1,5 +1,6 @@
 package thomas.musicapi.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 
@@ -18,6 +19,7 @@ public class User {
 
     private String email;
 
+    @JsonIgnore
     private String password;
 
     LocalDateTime createdAt;

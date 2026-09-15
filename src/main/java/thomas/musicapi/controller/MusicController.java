@@ -1,11 +1,13 @@
 package thomas.musicapi.controller;
 
 import jakarta.validation.Valid;
+import org.jspecify.annotations.Nullable;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import thomas.musicapi.dto.UpdateMusicRequest;
 import thomas.musicapi.dto.UploadMusicRequest;
 import thomas.musicapi.model.Music;
 import thomas.musicapi.service.MusicService;
@@ -34,5 +36,11 @@ public class MusicController {
     {
         musicService.deleteMusic(id);
         return ResponseEntity.ok().body(Map.of("message", "Music deleted successfully"));
+    }
+
+    @PatchMapping("/{id}")
+    public Music updateMusic(@PathVariable Long id, @Nullable @RequestPart("metadata")UpdateMusicRequest updateMusicRequest, @Nullable @RequestPart("file") MultipartFile multipartFile) throws IOException
+    {
+        return musicService.updateMusic(id, updateMusicRequest, multipartFile);
     }
 }

@@ -10,26 +10,14 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
 
-public class SignupRequest {
-    @NotBlank (message = "username is required")
-    private String username;
+public record SignupRequest(
+        @NotBlank(message = "username is required")
+        String username,
 
-    @Email (message = "valid email is required")
-    private String email;
+        @Email(message = "valid email is required")
+        String email,
 
-    @NotBlank(message = "password is required")
-    @Size(min = 8, message = "password length should be at least 8")
-    private String password;
-
-    public String getPassword() {
-        return password;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public String getUsername() {
-        return username;
-    }
+        @NotBlank(message = "password is required")
+        @Size(min = 8, message = "password length should be at least 8")
+        String password) {
 }
