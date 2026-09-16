@@ -13,11 +13,14 @@ import thomas.musicapi.model.Music;
 import thomas.musicapi.service.MusicService;
 
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.nio.file.AccessDeniedException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/music")
+@RequestMapping("/musics")
 public class MusicController {
     private final MusicService musicService;
 
@@ -25,7 +28,7 @@ public class MusicController {
         this.musicService = musicService;
     }
 
-    @PostMapping("/upload")
+    @PostMapping("")
     public Music uploadMusic(@Validated @RequestPart("metadata") UploadMusicRequest uploadMusicRequest, @RequestPart("file") MultipartFile multipartFile) throws IOException
     {
         return musicService.uploadMusic(uploadMusicRequest, multipartFile);
@@ -42,5 +45,17 @@ public class MusicController {
     public Music updateMusic(@PathVariable Long id, @Nullable @RequestPart("metadata")UpdateMusicRequest updateMusicRequest, @Nullable @RequestPart("file") MultipartFile multipartFile) throws IOException
     {
         return musicService.updateMusic(id, updateMusicRequest, multipartFile);
+    }
+
+    @GetMapping("")
+    public List<Music> getAllMusic()
+    {
+        return musicService.getAllMusic();
+    }
+
+    @GetMapping("/{id}")
+    public Music getMusicById(@PathVariable Long id)
+    {
+        return musicService.getMusicById(id);
     }
 }

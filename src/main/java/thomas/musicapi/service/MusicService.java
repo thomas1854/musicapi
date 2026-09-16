@@ -26,6 +26,8 @@ import thomas.musicapi.repository.UserRepository;
 import java.io.IOException;
 import java.nio.file.AccessDeniedException;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -130,5 +132,13 @@ public class MusicService {
         }
 
         return music;
+    }
+
+    public List<Music> getAllMusic() {
+        return musicRepository.findAll();
+    }
+
+    public Music getMusicById(Long id) {
+        return musicRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Music not found"));
     }
 }
