@@ -106,7 +106,7 @@ public class MusicService {
             throw new UsernameNotFoundException("Authentication required");
 
         if(!music.getUser().getUsername().equals(authentication.getName()))
-            throw new ResourceAccessDeniedException("You do not have access to delete this resource");
+            throw new ResourceAccessDeniedException("You do not have access to update this resource");
 
         if (updateMusicRequest != null && updateMusicRequest.title() != null)
             music.setTitle(updateMusicRequest.title());

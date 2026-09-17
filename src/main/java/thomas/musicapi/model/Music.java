@@ -6,6 +6,7 @@ import org.hibernate.annotations.Fetch;
 import java.time.LocalDateTime;
 
 @Entity
+@Table(name = "musics")
 public class Music {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
