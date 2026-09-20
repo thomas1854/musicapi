@@ -5,6 +5,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import thomas.musicapi.dto.AddMusicPlaylistRequest;
 import thomas.musicapi.dto.CreatePlaylistRequest;
 import thomas.musicapi.dto.UpdatePlaylistRequest;
 import thomas.musicapi.exception.ResourceAccessDeniedException;
@@ -12,6 +13,7 @@ import thomas.musicapi.exception.ResourceNotFoundException;
 import thomas.musicapi.model.Music;
 import thomas.musicapi.model.Playlist;
 import thomas.musicapi.model.User;
+import thomas.musicapi.repository.MusicRepository;
 import thomas.musicapi.repository.PlaylistRepository;
 import thomas.musicapi.repository.UserRepository;
 
@@ -23,10 +25,12 @@ import java.util.List;
 public class PlaylistService {
     private final PlaylistRepository playlistRepository;
     private final UserRepository userRepository;
+    private final MusicRepository musicRepository;
 
-    public PlaylistService(PlaylistRepository playlistRepository, UserRepository userRepository) {
+    public PlaylistService(PlaylistRepository playlistRepository, UserRepository userRepository, MusicRepository musicRepository) {
         this.playlistRepository = playlistRepository;
         this.userRepository = userRepository;
+        this.musicRepository = musicRepository;
     }
 
     private Playlist createPlaylistRequestToPlaylist(CreatePlaylistRequest createPlaylistRequest, User user)
@@ -86,6 +90,19 @@ public class PlaylistService {
         if (updatePlaylistRequest != null && updatePlaylistRequest.description() != null)
             playlist.setDescription(updatePlaylistRequest.description());
         playlist.setUpdatedAt(LocalDateTime.now());
+        return playlist;
+    }
+
+    @Transactional
+    public Playlist addMusicPlaylist(Long playlistId, AddMusicPlaylistRequest addMusicPlaylistRequest) {
+        Playlist playlist = playlistRepository.findById(playlistId).orElseThrow(() -> new ResourceNotFoundException("playlist not found"));
+        Long[] musicIds = addMusicPlaylistRequest.musicIds();
+        for (Long musicId : musicIds)
+        {
+            Music music = musicRepository.findById(musicId).orElseThrow(() -> new ResourceNotFoundException("music with id " + musicId + " not found"));
+            playlist.getMusics().add(music);
+        }
+
         return playlist;
     }
 }

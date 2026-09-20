@@ -2,6 +2,7 @@ package thomas.musicapi.controller;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import thomas.musicapi.dto.AddMusicPlaylistRequest;
 import thomas.musicapi.dto.CreatePlaylistRequest;
 import thomas.musicapi.dto.UpdatePlaylistRequest;
 import thomas.musicapi.model.Playlist;
@@ -46,5 +47,12 @@ public class PlaylistController {
     Playlist updatePlaylist(@PathVariable Long id, @RequestBody UpdatePlaylistRequest updatePlaylistRequest)
     {
         return playlistService.updatePlaylist(id, updatePlaylistRequest);
+    }
+
+    @PostMapping("/{playlistId}")
+    ResponseEntity<Map<String, String>> addMusicPlaylist(@PathVariable Long playlistId, @RequestBody AddMusicPlaylistRequest addMusicPlaylistRequest)
+    {
+        playlistService.addMusicPlaylist(playlistId, addMusicPlaylistRequest);
+        return ResponseEntity.ok().body(Map.of("message", "Musics added to playlist successfully"));
     }
 }

@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import org.hibernate.annotations.Fetch;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 @Entity
 @Table(name = "musics")
@@ -119,5 +120,16 @@ public class Music {
 
     public void setUser(User user) {
         this.user = user;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof Music music)) return false;
+        return Objects.equals(musicId, music.musicId);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(musicId);
     }
 }

@@ -3,6 +3,8 @@ package thomas.musicapi.model;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Set;
 
 @Entity
 @Table(name = "playlists")
@@ -18,13 +20,26 @@ public class Playlist {
     @JoinColumn(name = "user_id", nullable = false)
     User user;
 
-    public Playlist(Long musicId, String description, String title, LocalDateTime createdAt, LocalDateTime updatedAt, User user) {
+    @ManyToMany
+    @JoinTable(name = "playlist_musics", joinColumns = @JoinColumn(name = "playlist_id"), inverseJoinColumns = @JoinColumn(name = "music_id"))
+    Set<Music> musics;
+
+    public Playlist(Long musicId, String title, String description, LocalDateTime createdAt, LocalDateTime updatedAt, Set<Music> musics, User user) {
         this.musicId = musicId;
-        this.description = description;
         this.title = title;
+        this.description = description;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
+        this.musics = musics;
         this.user = user;
+    }
+
+    public Set<Music> getMusics() {
+        return musics;
+    }
+
+    public void setMusics(Set<Music> musics) {
+        this.musics = musics;
     }
 
     public Playlist() {
