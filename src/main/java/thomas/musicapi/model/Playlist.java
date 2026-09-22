@@ -3,7 +3,6 @@ package thomas.musicapi.model;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -11,7 +10,7 @@ import java.util.Set;
 public class Playlist {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long musicId;
+    private Long playlistId;
     private String title;
     private String description;
     private LocalDateTime createdAt;
@@ -24,8 +23,8 @@ public class Playlist {
     @JoinTable(name = "playlist_musics", joinColumns = @JoinColumn(name = "playlist_id"), inverseJoinColumns = @JoinColumn(name = "music_id"))
     Set<Music> musics;
 
-    public Playlist(Long musicId, String title, String description, LocalDateTime createdAt, LocalDateTime updatedAt, Set<Music> musics, User user) {
-        this.musicId = musicId;
+    public Playlist(Long playlistId, String title, String description, LocalDateTime createdAt, LocalDateTime updatedAt, Set<Music> musics, User user) {
+        this.playlistId = playlistId;
         this.title = title;
         this.description = description;
         this.createdAt = createdAt;
@@ -53,12 +52,12 @@ public class Playlist {
         this.title = title;
     }
 
-    public Long getMusicId() {
-        return musicId;
+    public Long getPlaylistId() {
+        return playlistId;
     }
 
-    public void setMusicId(Long musicId) {
-        this.musicId = musicId;
+    public void setPlaylistId(Long playlistId) {
+        this.playlistId = playlistId;
     }
 
     public String getDescription() {

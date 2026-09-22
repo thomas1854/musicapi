@@ -2,7 +2,7 @@ package thomas.musicapi.controller;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import thomas.musicapi.dto.AddMusicPlaylistRequest;
+import thomas.musicapi.dto.AddDeleteMusicPlaylistRequest;
 import thomas.musicapi.dto.CreatePlaylistRequest;
 import thomas.musicapi.dto.UpdatePlaylistRequest;
 import thomas.musicapi.model.Playlist;
@@ -50,9 +50,16 @@ public class PlaylistController {
     }
 
     @PostMapping("/{playlistId}")
-    ResponseEntity<Map<String, String>> addMusicPlaylist(@PathVariable Long playlistId, @RequestBody AddMusicPlaylistRequest addMusicPlaylistRequest)
+    ResponseEntity<Map<String, String>> addMusicPlaylist(@PathVariable Long playlistId, @RequestBody AddDeleteMusicPlaylistRequest addDeleteMusicPlaylistRequest)
     {
-        playlistService.addMusicPlaylist(playlistId, addMusicPlaylistRequest);
+        playlistService.addMusicPlaylist(playlistId, addDeleteMusicPlaylistRequest);
         return ResponseEntity.ok().body(Map.of("message", "Musics added to playlist successfully"));
+    }
+
+    @DeleteMapping("/{playlistId}/musics")
+    ResponseEntity<Map<String, String>> deleteMusicPlaylist(@PathVariable Long playlistId, @RequestBody AddDeleteMusicPlaylistRequest addDeleteMusicPlaylistRequest)
+    {
+        playlistService.deleteMusicPlaylist(playlistId, addDeleteMusicPlaylistRequest);
+        return ResponseEntity.ok().body(Map.of("message", "Musics deleted from playlist successfully"));
     }
 }

@@ -5,7 +5,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
-import thomas.musicapi.dto.AddMusicPlaylistRequest;
+import thomas.musicapi.dto.AddDeleteMusicPlaylistRequest;
 import thomas.musicapi.dto.CreatePlaylistRequest;
 import thomas.musicapi.dto.UpdatePlaylistRequest;
 import thomas.musicapi.exception.ResourceAccessDeniedException;
@@ -17,7 +17,6 @@ import thomas.musicapi.repository.MusicRepository;
 import thomas.musicapi.repository.PlaylistRepository;
 import thomas.musicapi.repository.UserRepository;
 
-import java.nio.file.AccessDeniedException;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -94,15 +93,39 @@ public class PlaylistService {
     }
 
     @Transactional
-    public Playlist addMusicPlaylist(Long playlistId, AddMusicPlaylistRequest addMusicPlaylistRequest) {
+    public void addMusicPlaylist(Long playlistId, AddDeleteMusicPlaylistRequest addDeleteMusicPlaylistRequest) {
         Playlist playlist = playlistRepository.findById(playlistId).orElseThrow(() -> new ResourceNotFoundException("playlist not found"));
-        Long[] musicIds = addMusicPlaylistRequest.musicIds();
+        Authentication authentication =  SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null)
+            throw new UsernameNotFoundException("Authentication required");
+
+        if(!playlist.getUser().getUsername().equals(authentication.getName()))
+            throw new ResourceAccessDeniedException("You do not have access to update this resource");
+
+        Long[] musicIds = addDeleteMusicPlaylistRequest.musicIds();
         for (Long musicId : musicIds)
         {
             Music music = musicRepository.findById(musicId).orElseThrow(() -> new ResourceNotFoundException("music with id " + musicId + " not found"));
             playlist.getMusics().add(music);
         }
+    }
 
-        return playlist;
+    @Transactional
+    public void deleteMusicPlaylist(Long playlistId, AddDeleteMusicPlaylistRequest addDeleteMusicPlaylistRequest) {
+        Playlist playlist = playlistRepository.findById(playlistId).orElseThrow(() -> new ResourceNotFoundException("playlist not found"));
+
+        Authentication authentication =  SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null)
+            throw new UsernameNotFoundException("Authentication required");
+
+        if(!playlist.getUser().getUsername().equals(authentication.getName()))
+            throw new ResourceAccessDeniedException("You do not have access to update this resource");
+
+        Long[] musicIds = addDeleteMusicPlaylistRequest.musicIds();
+        for (Long musicId : musicIds)
+        {
+            Music music = musicRepository.findById(musicId).orElseThrow(() -> new ResourceNotFoundException("music with id " + musicId + " not found"));
+            playlist.getMusics().remove(music);
+        }
     }
 }
