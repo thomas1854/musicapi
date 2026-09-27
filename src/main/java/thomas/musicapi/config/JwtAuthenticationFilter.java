@@ -28,6 +28,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     }
 
     @Override
+    public boolean shouldNotFilterAsyncDispatch()
+    {
+        return false;
+    }
+
+    @Override
     protected void doFilterInternal(@NotNull HttpServletRequest httpServletRequest, @NotNull HttpServletResponse httpServletResponse, @NotNull FilterChain filterChain)
     throws ServletException, IOException {
         final String authHeader = httpServletRequest.getHeader("Authorization");
