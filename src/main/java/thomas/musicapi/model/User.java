@@ -6,6 +6,8 @@ import jakarta.validation.constraints.Email;
 
 import java.time.LocalDateTime;
 import java.util.Date;
+import java.util.Objects;
+import java.util.Set;
 
 @Entity
 @Table(name = "users")
@@ -26,13 +28,28 @@ public class User {
 
     private String userRole;
 
-    public User(Long userId, String username, String email, String password, LocalDateTime createdAt, String userRole) {
+    @JsonIgnore
+    @ManyToMany
+    @JoinTable(
+            name = "followers",
+            joinColumns = @JoinColumn(name = "followed_by_id"),
+            inverseJoinColumns = @JoinColumn(name = "followed_id")
+    )
+    Set<User> following;
+
+    @JsonIgnore
+    @ManyToMany(mappedBy = "following")
+    Set<User> followedBy;
+
+    public User(Long userId, Set<User> followedBy, Set<User> following, String userRole, LocalDateTime createdAt, String password, String email, String username) {
         this.userId = userId;
-        this.username = username;
-        this.email = email;
-        this.password = password;
-        this.createdAt = createdAt;
+        this.followedBy = followedBy;
+        this.following = following;
         this.userRole = userRole;
+        this.createdAt = createdAt;
+        this.password = password;
+        this.email = email;
+        this.username = username;
     }
 
     public User()
@@ -88,6 +105,22 @@ public class User {
         this.userRole = userRole;
     }
 
+    public Set<User> getFollowing() {
+        return following;
+    }
+
+    public void setFollowing(Set<User> following) {
+        this.following = following;
+    }
+
+    public Set<User> getFollowedBy() {
+        return followedBy;
+    }
+
+    public void setFollowedBy(Set<User> followedBy) {
+        this.followedBy = followedBy;
+    }
+
     @Override
     public String toString() {
         return "User{" +
@@ -96,6 +129,18 @@ public class User {
                 ", email='" + email + '\'' +
                 ", password='" + password + '\'' +
                 ", createdAt=" + createdAt +
+                ", userRole='" + userRole + '\'' +
                 '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof User user)) return false;
+        return Objects.equals(userId, user.userId);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(userId);
     }
 }
